@@ -17,12 +17,9 @@ public class MainActivity extends AppCompatActivity {
         Fragment fragment = mManager.findFragmentById(R.id.container);
         if (fragment == null){
             fragment = new MainActivityFragment();
+            mManager.beginTransaction()
+                    .add(R.id.container, fragment)
+                    .commit();
         }
-        mManager.beginTransaction()
-                .add(R.id.container, fragment)
-                .commit();
     }
-
-
-
 }
