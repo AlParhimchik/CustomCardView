@@ -54,6 +54,7 @@ public class Card extends CardView implements View.OnTouchListener {
 
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
+
         switch (motionEvent.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 xStartCard = cardView.getX();
