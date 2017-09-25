@@ -14,12 +14,15 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivityFragment extends Fragment {
 
     private Card cardView;
+    private Button okButton;
+    private Button xButton;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
@@ -27,9 +30,6 @@ public class MainActivityFragment extends Fragment {
 
         cardView = (Card) view.findViewById(R.id.card_view);
 
-
         return view;
     }
-
-
 }
