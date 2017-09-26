@@ -1,6 +1,9 @@
 package com.vpaveldm.wordcards;
 
+import android.content.ContentValues;
 import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Point;
 import android.support.v7.widget.CardView;
 import android.util.AttributeSet;
@@ -13,6 +16,8 @@ import android.view.animation.AnimationUtils;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.vpaveldm.wordcards.database.DBHelper;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -24,6 +29,7 @@ public class Card extends CardView implements View.OnTouchListener {
     private Animation shrink_animation;
     private Animation grow_animation;
     private Context mContext;
+    private DBHelper mDBHelper;
 
     private final static float RIGHT_DISABLE_COEFFICIENT = 3f / 5;
     private final static float LEFT_DISABLE_COEFFICIENT = 2f / 5;
@@ -64,12 +70,30 @@ public class Card extends CardView implements View.OnTouchListener {
         grow_animation.setAnimationListener(listener);
     }
 
-    public void init(List<String> englishWords, List<String> transcriptionWords, List<String> russianWords) {
-        for (int i = 0; i < englishWords.size(); i++)
-            mWords.add(new Word(englishWords.get(i), transcriptionWords.get(i), russianWords.get(i)));
+    public void init() {
+        mDBHelper = new DBHelper(mContext);
+        SQLiteDatabase database = mDBHelper.getWritableDatabase();
+
+
+        if (mWords.size() == 1)
+            mWords.remove(new Word("", "", ""));
+
+        Cursor cursor = database.query(DBHelper.DATABASE_WORDS, null, null, null, null, null, null);
+        if (cursor.moveToFirst()) {
+            int idIndex = cursor.getColumnIndex(DBHelper.KEY_ID);
+            int enIndex = cursor.getColumnIndex(DBHelper.KEY_ENGLISH_WORD);
+            int ruIndex = cursor.getColumnIndex(DBHelper.KEY_RUSSIAN_WORD);
+            int trIndex = cursor.getColumnIndex(DBHelper.KEY_TRANSCRIPTION);
+            do {
+                mWords.add(new Word(cursor.getString(enIndex), cursor.getString(trIndex), cursor.getString(ruIndex)));
+            } while (cursor.moveToNext());
+        }
+        cursor.close();
         wordTextView = (TextView) cardView.findViewById(R.id.word_text_view);
         transcriptionTextView = (TextView) cardView.findViewById(R.id.transcription_text_view);
-        currentWord = mWords.get(new Random().nextInt(5));
+        if (mWords.size() == 0)
+            mWords.add(new Word("", "", ""));
+        currentWord = mWords.get(new Random().nextInt(mWords.size()));
         setEnglishWord(currentWord);
     }
 
@@ -86,7 +110,7 @@ public class Card extends CardView implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
                 cardView.setX(cardView.getX() + (motionEvent.getX() - xCurrent));
                 cardView.setY(cardView.getY() + (motionEvent.getY() - yCurrent));
-                Toast.makeText(getContext(), String.valueOf(motionEvent.getX()), Toast.LENGTH_SHORT).show();
+//                Toast.makeText(getContext(), String.valueOf(motionEvent.getX()), Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_UP:
                 if ((motionEvent.getEventTime() - motionEvent.getDownTime() < NOT_MOVE_TIME_VALUE
@@ -122,7 +146,7 @@ public class Card extends CardView implements View.OnTouchListener {
             cardView.setOnTouchListener(null);
             if (animation.equals(fadeout_animation)) {
                 Random random = new Random();
-                int index = Math.abs(random.nextInt(5));
+                int index = Math.abs(random.nextInt(mWords.size()));
                 currentWord = mWords.get(index);
                 setEnglishWord(currentWord);
             }
@@ -170,6 +194,16 @@ public class Card extends CardView implements View.OnTouchListener {
 
         public String getTranscription() {
             return transcription;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            Word word = (Word) obj;
+            if (word.englishWord.equals(this.englishWord) &&
+                    word.russianWord.equals(this.russianWord) &&
+                    word.transcription.equals(this.transcription))
+                return true;
+            else return false;
         }
     }
 }
