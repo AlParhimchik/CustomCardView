@@ -10,6 +10,12 @@ import android.view.View;
 import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
+import android.widget.TextView;
+import android.widget.Toast;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 
 public class Card extends CardView implements View.OnTouchListener {
@@ -21,16 +27,24 @@ public class Card extends CardView implements View.OnTouchListener {
 
     private final static float RIGHT_DISABLE_COEFFICIENT = 3f / 5;
     private final static float LEFT_DISABLE_COEFFICIENT = 2f / 5;
-    private final static float NOT_MOVE_VALUE = 100f;
+    private final static float NOT_MOVE_TIME_VALUE = 100f;
+    private final static float NOT_MOVE_DISTANCE_VALUE = 1f;
     private Card cardView;
     private float xCurrent;
     private float yCurrent;
     private float xStartCard;
     private float yStartCard;
     private Point sizeWindow;
+    private TextView wordTextView;
+    private TextView transcriptionTextView;
+    private List<Word> mWords;
+    private Word currentWord;
+    private boolean isEnglish = true;
 
     public Card(Context context, AttributeSet attrs) {
         super(context, attrs);
+
+        mWords = new ArrayList<>();
 
         mContext = context;
         cardView = this;
@@ -50,6 +64,15 @@ public class Card extends CardView implements View.OnTouchListener {
         grow_animation.setAnimationListener(listener);
     }
 
+    public void init(List<String> englishWords, List<String> transcriptionWords, List<String> russianWords) {
+        for (int i = 0; i < englishWords.size(); i++)
+            mWords.add(new Word(englishWords.get(i), transcriptionWords.get(i), russianWords.get(i)));
+        wordTextView = (TextView) cardView.findViewById(R.id.word_text_view);
+        transcriptionTextView = (TextView) cardView.findViewById(R.id.transcription_text_view);
+        currentWord = mWords.get(new Random().nextInt(5));
+        setEnglishWord(currentWord);
+    }
+
     @Override
     public boolean onTouch(View view, MotionEvent motionEvent) {
 
@@ -63,10 +86,13 @@ public class Card extends CardView implements View.OnTouchListener {
             case MotionEvent.ACTION_MOVE:
                 cardView.setX(cardView.getX() + (motionEvent.getX() - xCurrent));
                 cardView.setY(cardView.getY() + (motionEvent.getY() - yCurrent));
+                Toast.makeText(getContext(), String.valueOf(motionEvent.getX()), Toast.LENGTH_SHORT).show();
                 break;
             case MotionEvent.ACTION_UP:
-                if (motionEvent.getEventTime() - motionEvent.getDownTime() < NOT_MOVE_VALUE
-                        && motionEvent.getEventTime() - motionEvent.getDownTime() < NOT_MOVE_VALUE) {
+                if ((motionEvent.getEventTime() - motionEvent.getDownTime() < NOT_MOVE_TIME_VALUE
+                        && motionEvent.getEventTime() - motionEvent.getDownTime() < NOT_MOVE_TIME_VALUE)
+                        || (Math.abs(xStartCard - cardView.getX()) < NOT_MOVE_DISTANCE_VALUE &&
+                        Math.abs(yStartCard - cardView.getY()) < NOT_MOVE_DISTANCE_VALUE)) {
                     cardView.startAnimation(shrink_animation);
                 } else if ((cardView.getX() + cardView.getWidth()) < RIGHT_DISABLE_COEFFICIENT * sizeWindow.x ||
                         cardView.getX() > LEFT_DISABLE_COEFFICIENT * sizeWindow.x) {
@@ -79,23 +105,71 @@ public class Card extends CardView implements View.OnTouchListener {
         return true;
     }
 
+    private void setRussianWord(Word word) {
+        wordTextView.setText(word.getRussianWord());
+        transcriptionTextView.setText("");
+    }
+
+    private void setEnglishWord(Word word) {
+        wordTextView.setText(word.getEnglishWord());
+        transcriptionTextView.setText(word.getTranscription());
+    }
+
     private class CardListener implements Animation.AnimationListener {
 
         @Override
         public void onAnimationStart(Animation animation) {
             cardView.setOnTouchListener(null);
+            if (animation.equals(fadeout_animation)) {
+                Random random = new Random();
+                int index = Math.abs(random.nextInt(5));
+                currentWord = mWords.get(index);
+                setEnglishWord(currentWord);
+            }
         }
 
         @Override
         public void onAnimationEnd(Animation animation) {
             cardView.setOnTouchListener(Card.this);
-            if (animation.equals(shrink_animation))
+            if (animation.equals(shrink_animation)) {
+                if (isEnglish) {
+                    setRussianWord(currentWord);
+                    isEnglish = false;
+                } else {
+                    setEnglishWord(currentWord);
+                    isEnglish = true;
+                }
                 cardView.startAnimation(grow_animation);
+            }
         }
 
         @Override
         public void onAnimationRepeat(Animation animation) {
 
+        }
+    }
+
+    private class Word {
+        private String englishWord;
+        private String russianWord;
+        private String transcription;
+
+        private Word(String englishWord, String transcription, String russianWord) {
+            this.englishWord = englishWord;
+            this.russianWord = russianWord;
+            this.transcription = transcription;
+        }
+
+        public String getEnglishWord() {
+            return englishWord;
+        }
+
+        public String getRussianWord() {
+            return russianWord;
+        }
+
+        public String getTranscription() {
+            return transcription;
         }
     }
 }

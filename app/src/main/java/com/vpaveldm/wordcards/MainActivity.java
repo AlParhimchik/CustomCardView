@@ -27,6 +27,7 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mManager = getSupportFragmentManager();
+
         Fragment fragment = mManager.findFragmentById(R.id.container);
         if (fragment == null){
             fragment = new MainActivityFragment();
