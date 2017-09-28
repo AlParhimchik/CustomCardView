@@ -1,6 +1,5 @@
 package com.vpaveldm.wordcards;
 
-import android.content.ContentValues;
 import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -14,7 +13,6 @@ import android.view.WindowManager;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.vpaveldm.wordcards.database.DBHelper;
 
@@ -29,7 +27,6 @@ public class Card extends CardView implements View.OnTouchListener {
     private Animation shrink_animation;
     private Animation grow_animation;
     private Context mContext;
-    private DBHelper mDBHelper;
 
     private final static float RIGHT_DISABLE_COEFFICIENT = 3f / 5;
     private final static float LEFT_DISABLE_COEFFICIENT = 2f / 5;
@@ -71,8 +68,8 @@ public class Card extends CardView implements View.OnTouchListener {
     }
 
     public void init() {
-        mDBHelper = new DBHelper(mContext);
-        SQLiteDatabase database = mDBHelper.getWritableDatabase();
+        DBHelper DBHelper = new DBHelper(mContext);
+        SQLiteDatabase database = DBHelper.getWritableDatabase();
 
 
         if (mWords.size() == 1)
@@ -143,7 +140,7 @@ public class Card extends CardView implements View.OnTouchListener {
 
         @Override
         public void onAnimationStart(Animation animation) {
-            cardView.setOnTouchListener(null);
+//            cardView.setOnTouchListener(null);
             if (animation.equals(fadeout_animation)) {
                 Random random = new Random();
                 int index = Math.abs(random.nextInt(mWords.size()));
@@ -154,7 +151,7 @@ public class Card extends CardView implements View.OnTouchListener {
 
         @Override
         public void onAnimationEnd(Animation animation) {
-            cardView.setOnTouchListener(Card.this);
+//            cardView.setOnTouchListener(Card.this);
             if (animation.equals(shrink_animation)) {
                 if (isEnglish) {
                     setRussianWord(currentWord);

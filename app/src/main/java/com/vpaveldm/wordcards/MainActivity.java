@@ -3,9 +3,7 @@ package com.vpaveldm.wordcards;
 
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v4.app.DialogFragment;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.view.View;
 import android.support.design.widget.NavigationView;
@@ -15,7 +13,6 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 
 import android.support.v7.widget.Toolbar;
-import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends AppCompatActivity
@@ -31,7 +28,7 @@ public class MainActivity extends AppCompatActivity
         mManager = getSupportFragmentManager();
 
         fragment = (MainActivityFragment) mManager.findFragmentById(R.id.container);
-        if (fragment == null){
+        if (fragment == null) {
             fragment = new MainActivityFragment();
             mManager.beginTransaction()
                     .add(R.id.container, fragment)
@@ -59,7 +56,6 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
     }
-
 
 
     @Override

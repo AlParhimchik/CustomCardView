@@ -28,13 +28,6 @@ public class MainActivityFragment extends Fragment  {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
 
         cardView = (Card) view.findViewById(R.id.card_view);
-
-        List<String> englishWords = new ArrayList<>();
-        List<String> transcriptionWords = new ArrayList<>();
-        List<String> russianWords = new ArrayList<>();
-
-
-
         cardView.init();
 
         return view;
